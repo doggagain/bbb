@@ -11,6 +11,10 @@ public class BinaryNode<T extends HaveKey> extends HaveKey {
 		this.Left=left;
 		this.Right=right;
 	}
+
+	public BinaryNode(T info){
+		this.Info=info;
+	}
 	
 	public T GetInfo(){
 		return this.Info;

@@ -7,7 +7,7 @@ public class BinaryParser {
                 students=ParseLine(line);
             }
         }
-
+        return CreateTree(students);
     } 
 
     private Student[] ParseLine(String line){
@@ -23,7 +23,8 @@ public class BinaryParser {
         BinarySearchTree<Student> tree=new BinarySearchTree<Student>();
 
         for(int i=0;i<students.length;i++){
-            tree.Insert(new Node)
+            tree.Insert(new BinaryNode<Student>(students[i]));
         }
+        return tree;
     }
 }
