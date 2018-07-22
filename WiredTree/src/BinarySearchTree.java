@@ -217,4 +217,57 @@ public class BinarySearchTree<T extends HaveKey> {
 		}
 		return null;
 	}
+
+	public String[] InorderStart(){
+		String[] keys=new String[this.Size];
+		Inorder(this.Root,keys,0);
+		return keys;
+	}
+
+	public void Inorder(BinaryNode<T> node,String[] keys,int index){
+		if(node.IsParentOfLeft()){
+			Inorder(node.GetLeft(),keys,index);
+		}
+		keys[index]=node.GetKey();
+		index++;
+		if(node.IsParentOfRight()){
+			Inorder(node.GetRight(),keys,index);
+		}
+	}
+
+	
+	public String[] PreorderStart(){
+		String[] keys=new String[this.Size];
+		Preorder(this.Root,keys,0);
+		return keys;
+	}
+
+	public void Preorder(BinaryNode<T> node,String[] keys,int index){
+		keys[index]=node.GetKey();
+		index++;
+		if(node.IsParentOfLeft()){
+			Inorder(node.GetLeft(),keys,index);
+		}
+		if(node.IsParentOfRight()){
+			Inorder(node.GetRight(),keys,index);
+		}
+	}
+
+	
+	public String[] PostorderStart(){
+		String[] keys=new String[this.Size];
+		Postorder(this.Root,keys,0);
+		return keys;
+	}
+
+	public void Postorder(BinaryNode<T> node,String[] keys,int index){
+		if(node.IsParentOfLeft()){
+			Inorder(node.GetLeft(),keys,index);
+		}
+		if(node.IsParentOfRight()){
+			Inorder(node.GetRight(),keys,index);
+		}
+		keys[index]=node.GetKey();
+		index++;
+	}
 }
