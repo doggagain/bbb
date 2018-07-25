@@ -10,7 +10,7 @@ public class Student extends HaveKey {
 
 	public Student(String part){
 		String[] details=part.split("#");
-		this.Id=details[0];
+		this.Id=Integer.parseInt(details[0]);
 		this.Name=details[1];
 	}
 	

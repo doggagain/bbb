@@ -113,7 +113,7 @@ public class BinaryNode<T extends HaveKey> extends HaveKey {
 	
 	public BinaryNode<T> GetMinium(){
 		BinaryNode<T> currentRoot=this;
-		while(!currentRoot.IsLeaf()){
+		while(currentRoot.IsParentOfLeft()){
 			currentRoot=currentRoot.GetLeft();
 		}
 		return currentRoot;
@@ -121,7 +121,7 @@ public class BinaryNode<T extends HaveKey> extends HaveKey {
 	
 	public BinaryNode<T> GetMaximum(){
 		BinaryNode<T> currentRoot=this;
-		while(!currentRoot.IsLeaf()){
+		while(currentRoot.IsParentOfRight()){
 			currentRoot=currentRoot.GetRight();
 		}
 		return currentRoot;

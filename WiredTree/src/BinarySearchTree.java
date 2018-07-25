@@ -33,14 +33,24 @@ public class BinarySearchTree<T extends HaveKey> {
 		
 		if(x==null){
 			this.Root=node;
+			this.Median=this.Root;
+			this.Size=1;
 			return;
 		}
 		
 		while(!x.IsLeaf()){
 			if(node.GetKey() < x.GetKey()){
-				x=x.GetLeft();
+				if(x.IsParentOfLeft()){
+					x=x.GetLeft();
+				}else{
+					break;
+				}
 			}else{
-				x=x.GetRight();
+				if(x.IsParentOfRight()){
+					x=x.GetRight();
+				}else{
+					break;
+				}
 			}
 		}
 		
@@ -60,17 +70,22 @@ public class BinarySearchTree<T extends HaveKey> {
 	
 	
 	
-	public BinaryNode<T> Delete(BinaryNode<T> node){
-		BinaryNode<T> searchResult= this.Search(node.GetInfo());
+	public BinaryNode<T> Delete(T info){
+		BinaryNode<T> searchResult= this.Search(info);
 		if(searchResult==null){
 			return null;
 		}
-		this.UpdateMedianDelete(node);
+		this.UpdateMedianDelete(searchResult);
 		this.DecrementSize();
 		
 		BinaryNode<T> predecessor=searchResult.GetPredecessor();
 		BinaryNode<T> successor=searchResult.GetSuccessor();
 		
+		BinaryNode<T> twoChildrenResult=ReassignIfHasTwoChildren(searchResult,predecessor,successor);
+		if(twoChildrenResult!=null){
+			return twoChildrenResult;
+		}
+
 		ReassignPredecessorSuccessor(searchResult,predecessor,successor);
 		
 		BinaryNode<T> leafResult=ReassignIfLeaf(searchResult,predecessor,successor);
@@ -78,22 +93,22 @@ public class BinarySearchTree<T extends HaveKey> {
 			return leafResult;
 		}
 		
-		BinaryNode<T> twoChildrenResult=ReassignIfHasTwoChildren(searchResult,predecessor,successor);
-		if(twoChildrenResult!=null){
-			return twoChildrenResult;
-		}
-		
 		return DeleteOneChild(searchResult);
-		
 	}
 	
 	public void ReassignPredecessorSuccessor(BinaryNode<T> searchResult,BinaryNode<T> predecessor,BinaryNode<T> successor){
 		
-		if( predecessor!=null && predecessor.GetRight()==searchResult){
+		if( predecessor!=null && 
+			predecessor.GetRight()==searchResult && 
+			predecessor!=searchResult.GetParent() && 
+			searchResult!=predecessor.GetParent()){
 			predecessor.SetRight(successor);
 		}
 		
-		if( successor!=null && successor.GetLeft()==searchResult){
+		if( successor!=null && 
+			successor.GetLeft()==searchResult &&
+			successor!=searchResult.GetParent()&&
+			searchResult!=successor.GetParent()){
 			successor.SetLeft(predecessor);
 		}
 	}
@@ -104,11 +119,11 @@ public class BinarySearchTree<T extends HaveKey> {
 			if(searchResult.IsLeftChild()){
 				
 				searchResult.GetParent().SetLeft(predecessor);
-				
+				return searchResult;
 			}else if(searchResult.IsRightChild()){
 				
 				searchResult.GetParent().SetRight(successor);
-				
+				return searchResult;
 			}else{
 				this.Root=null;
 				return searchResult;
@@ -121,7 +136,7 @@ public class BinarySearchTree<T extends HaveKey> {
 	public BinaryNode<T> ReassignIfHasTwoChildren(BinaryNode<T> searchResult,BinaryNode<T> predecessor,BinaryNode<T> successor){
 		if(searchResult.IsParentOfLeft() && searchResult.IsParentOfRight()){
 			
-			BinaryNode<T> deleteResult=this.DeleteOneChild(successor);
+			BinaryNode<T> deleteResult=this.Delete(successor.GetInfo());
 			
 			T info = searchResult.GetInfo();
 			searchResult.SetInfo(deleteResult.GetInfo());
@@ -133,20 +148,28 @@ public class BinarySearchTree<T extends HaveKey> {
 	
 	public BinaryNode<T> DeleteOneChild(BinaryNode<T> node){
 		
-		if(node.GetParent()==null){
+		if(node.GetParent()==null){ //if for in case of root
 			if(node.IsParentOfRight()){
 				this.Root=node.GetRight();
 			}else{
 				this.Root=node.GetLeft();
 			}
 		}
-		
+
+		BinaryNode<T> child=null; //get your child
+		if(node.IsParentOfLeft()){
+			child=node.GetLeft();
+		}else{
+			child=node.GetRight();
+		}
+
 		if(node.IsLeftChild()){
-			node.GetParent().SetLeft(node.GetLeft());
+			node.GetParent().SetLeft(child);
 		}
 		if(node.IsRightChild()){
-			node.GetParent().SetRight(node.GetRight());
+			node.GetParent().SetRight(child);
 		}
+		child.SetParent(node.GetParent());
 		return node;
 	}
 	
@@ -194,7 +217,7 @@ public class BinarySearchTree<T extends HaveKey> {
 	
 	public BinaryNode<T> Search(T info){
 		BinaryNode<T> current=this.Root;
-		while(!current.IsLeaf() || current.GetKey()!=info.GetKey()){
+		while(!current.IsLeaf() && current.GetKey()!=info.GetKey()){
 			if(info.GetKey()< current.GetKey()){
 				
 				if(current.IsParentOfLeft()){
@@ -220,16 +243,17 @@ public class BinarySearchTree<T extends HaveKey> {
 
 	public String[] InorderStart(){
 		String[] keys=new String[this.Size];
-		Inorder(this.Root,keys,0);
+		int[] index={0};
+		Inorder(this.Root,keys,index);
 		return keys;
 	}
 
-	public void Inorder(BinaryNode<T> node,String[] keys,int index){
+	public void Inorder(BinaryNode<T> node,String[] keys,int[] index){
 		if(node.IsParentOfLeft()){
 			Inorder(node.GetLeft(),keys,index);
 		}
-		keys[index]=node.GetKey();
-		index++;
+		keys[index[0]]=String.valueOf(node.GetKey());
+		index[0]++;
 		if(node.IsParentOfRight()){
 			Inorder(node.GetRight(),keys,index);
 		}
@@ -238,36 +262,38 @@ public class BinarySearchTree<T extends HaveKey> {
 	
 	public String[] PreorderStart(){
 		String[] keys=new String[this.Size];
-		Preorder(this.Root,keys,0);
+		int[] index={0};
+		Preorder(this.Root,keys,index);
 		return keys;
 	}
 
-	public void Preorder(BinaryNode<T> node,String[] keys,int index){
-		keys[index]=node.GetKey();
-		index++;
+	public void Preorder(BinaryNode<T> node,String[] keys,int[] index){
+		keys[index[0]]=String.valueOf(node.GetKey());
+		index[0]++;
 		if(node.IsParentOfLeft()){
-			Inorder(node.GetLeft(),keys,index);
+			Preorder(node.GetLeft(),keys,index);
 		}
 		if(node.IsParentOfRight()){
-			Inorder(node.GetRight(),keys,index);
+			Preorder(node.GetRight(),keys,index);
 		}
 	}
 
 	
 	public String[] PostorderStart(){
 		String[] keys=new String[this.Size];
-		Postorder(this.Root,keys,0);
+		int[] index={0};
+		Postorder(this.Root,keys,index);
 		return keys;
-	}
+	}	
 
-	public void Postorder(BinaryNode<T> node,String[] keys,int index){
+	public void Postorder(BinaryNode<T> node,String[] keys,int[] index){
 		if(node.IsParentOfLeft()){
-			Inorder(node.GetLeft(),keys,index);
+			Postorder(node.GetLeft(),keys,index);
 		}
 		if(node.IsParentOfRight()){
-			Inorder(node.GetRight(),keys,index);
+			Postorder(node.GetRight(),keys,index);
 		}
-		keys[index]=node.GetKey();
-		index++;
+		keys[index[0]]=String.valueOf(node.GetKey());
+		index[0]++;
 	}
 }

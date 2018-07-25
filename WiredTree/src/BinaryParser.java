@@ -1,4 +1,8 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 public class BinaryParser {
+
     public BinarySearchTree<Student> ReadFile(String path){
         Student[] students=null;
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
@@ -6,6 +10,11 @@ public class BinaryParser {
             while ((line = br.readLine()) != null) {
                 students=ParseLine(line);
             }
+        }catch(java.io.IOException e){
+            System.out.println("could not load file.");
+        }finally {
+            // Will get executed, even if exception occurs
+            System.out.println("Finished");
         }
         return CreateTree(students);
     } 
