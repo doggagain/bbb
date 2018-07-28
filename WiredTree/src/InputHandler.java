@@ -1,5 +1,5 @@
 public class InputHandler{
-    BinarySearchTree<Student> GetInput(){
+    String[] GetInput(BinarySearchTree<Student> tree){
         return null;
     }
 }

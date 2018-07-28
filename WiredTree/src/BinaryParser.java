@@ -4,7 +4,7 @@ import java.io.FileReader;
 
 public class BinaryParser {
 
-    public BinarySearchTree<Student> ReadFile(String path){
+    public String[] ReadFile(String path,BinarySearchTree<Student> tree){
         Student[] students=null;
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
@@ -17,12 +17,8 @@ public class BinaryParser {
             // Will get executed, even if exception occurs
             System.out.println("Finished");
         }
-        return CreateTree(students);
+        return CreateTree(students,tree);
     } 
-
-    public BinarySearchTree<Student> GetTreeFromLine(String line){
-        return CreateTree(ParseLine(line));
-    }
 
     private Student[] ParseLine(String line){
         String[] parts=line.split(";");
@@ -33,12 +29,12 @@ public class BinaryParser {
         return students;
     }
 
-    private BinarySearchTree<Student> CreateTree(Student[] students){
-        BinarySearchTree<Student> tree=new BinarySearchTree<Student>();
-
+    private String[] CreateTree(Student[] students,BinarySearchTree<Student> tree){
+        String[] results=new String[students.length];
         for(int i=0;i<students.length;i++){
             tree.Insert(students[i]);
+            results[i]="inserted node successfully: "+students[i].toString();
         }
-        return tree;
+        return results;
     }
 }

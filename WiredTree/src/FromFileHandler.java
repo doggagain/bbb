@@ -4,10 +4,10 @@ public class FromFileHandler extends InputHandler {
     public FromFileHandler(){
         super();
     }
-    public BinarySearchTree<Student> GetInput(){
+    public String[] GetInput(BinarySearchTree<Student> tree){
         System.out.print("\nEnter location of file:");
-        String path= "/home/mosh/to/bbb/WiredTree/src/exam.txt";//new Scanner(System.in).nextLine();
+        String path= new Scanner(System.in).nextLine();
         BinaryParser parser=new BinaryParser();
-        return parser.ReadFile(path); 
+        return parser.ReadFile(path,tree); 
     }
 }
