@@ -1,386 +1,453 @@
+//package hello;
+
+import javax.sound.midi.MidiDevice.Info;
 
 public class BinarySearchTree<T extends HaveKey> {
 	private BinaryNode<T> Root;
 	private int Size;
 	private T Median;
-	
+
+	//Get Median of the tree
+	//input: none
+	//output: Median of the tree
 	public T GetMedian(){
 		return this.Median;
 	}
-	
+	//Get Root of the tree
+	//input: none
+	//output: Root of the tree
 	public BinaryNode<T> GetRoot(){
 		return this.Root;
 	}
 	
-	public void SetRoot(BinaryNode<T> root){
-		this.Root=root;
-	}
-	
+	//Get Size of the tree
+	//input: none
+	//output: Size of the tree
 	public int GetSize(){
 		return this.Size;
 	}
 	
+	//InrementSize of the tree
+	//input: none
+	//output: none
 	public void IncrementSize(){
 		this.Size++;
 	}
-	
+	//DecrementSize of the tree
+	//input: none
+	//output: none
 	public void DecrementSize(){
 		this.Size--;
 	}
 	
-	BinaryNode<T> Insert(T info)
-	{
-		// Searching for a Node with given value
-		BinaryNode<T> ptr = this.Root;
-		BinaryNode<T> par = null; // Parent of key to be inserted
+	//Get the correct parent for inserted node
+	//input: the info of the to be inserted node
+	//output: the parent of the node to be inserted
+	public BinaryNode<T> GetCorrectParent(T info) {
+		BinaryNode<T> currentNode = this.Root;
+		BinaryNode<T> parent = null; 
 
-		while (ptr != null)
+		while (currentNode != null)
 		{
 			// If key already exists, return
-			if (info.GetKey() == ptr.GetKey())
+			if (info.GetKey() == currentNode.GetKey())
 			{
-				return this.Root;
+				return null;
 			}
 	
-			par = ptr; // Update parent pointer
-	
-			// Moving on left subtree.
-			if (info.GetKey() < ptr.GetKey())
+			parent = currentNode; // Update parentent pointer
+			if (info.GetKey() < currentNode.GetKey()) //go to left tree
 			{
-				if (ptr.GetIsLeftThread() == false)
-					ptr = ptr.GetLeft();
+				if (currentNode.GetIsLeftThread() == false)
+					currentNode = currentNode.GetLeft();
 				else
 					break;
 			}
-	
-			// Moving on right subtree.
-			else
+			else//go to right tree
 			{
-				if (ptr.GetIsRightThread() == false)
-					ptr = ptr.GetRight();
+				if (currentNode.GetIsRightThread() == false)
+					currentNode = currentNode.GetRight();
 				else
 					break;
 			}
 		}
-	
-		// Create a new Node
-		BinaryNode<T> tmp = new BinaryNode<T>(info,true,true);
+		return parent;
+	}
 
-		if (par ==null)
+	//Insert new node to tree
+	//input: the info of the to be inserted node
+	//output: the root of the tree
+	public BinaryNode<T> Insert(T info)
+	{
+		BinaryNode<T> parent=this.GetCorrectParent(info);
+	
+		// init the node to be leaf with nulls as children
+		BinaryNode<T> nodeToInsert = new BinaryNode<T>(info,true,true);
+
+		if (parent ==null)//if the to be inserted node is the root
 		{
-			this.Root = tmp;
-			tmp.SetLeft(null);
-			tmp.SetRight(null);
-			this.Median=this.Root.GetInfo();
+			this.Root = nodeToInsert;
+			nodeToInsert.SetLeft(null);
+			nodeToInsert.SetRight(null);
+			this.Median=this.Root.GetInfo(); //set median and size to initialize them
 			this.Size=1;
 			return this.Root;
 		}
-		else if (info.GetKey() < par.GetKey())
+		else if (info.GetKey() < parent.GetKey()) //if the to be inserted node is a left child
 		{
-			tmp.SetLeft(par.GetLeft());
-			tmp.SetRight(par);
-			par.SetIsLeftThread(false);
-			par.SetLeft(tmp);
+			nodeToInsert.SetLeft(parent.GetLeft());
+			nodeToInsert.SetRight(parent); //thread to parent
+			parent.SetIsLeftThread(false); //parent has a real child on the left
+			parent.SetLeft(nodeToInsert);
 		}
-		else
+		else//if the to be inserted node is a right child
 		{
-			tmp.SetLeft(par);
-			tmp.SetRight(par.GetRight());
-			par.SetIsRightThread(false);
-			par.SetRight(tmp);
+			nodeToInsert.SetLeft(parent); //thread to parent
+			nodeToInsert.SetRight(parent.GetRight());
+			parent.SetIsRightThread(false); //parent has a real child on the tight
+			parent.SetRight(nodeToInsert);
 		}
-		this.UpdateMedianInsert(tmp);
-		this.IncrementSize();
+		this.UpdateMedianInsert(nodeToInsert);//update the median value of the tree
+		this.IncrementSize();//increase the size of the tree
 		return this.Root;
 	}
 
 	
 	
 
-	// Deletes a key from threaded BST with given root and
-// returns new root of BST.
-
-
+	//Delete a node that is present in the tree
+	//input: the info of the to be deleted node
+	//output: the info of the deleted node
 	public T Delete(T info)
 	{
-		//BinaryNode<T> root=this.Root;
-		BinaryNode<T>[] nodes= this.Search(info);
-		if(nodes==null){
-			return null;
+		BinaryNode<T>[] nodes= this.Search(info); //get the to be deleted node and its parent 
+		if(nodes==null){ //if not found then cant delete
+			return null; 
 		}
-		BinaryNode<T> par=nodes[0],ptr=nodes[1];
-		T infoOfFoundNode=ptr.GetInfo();
-		this.UpdateMedianDelete(ptr);
-		this.DecrementSize();
-		// Initialize parent as NULL and ptrent
-		// Node as root.
+		BinaryNode<T> parent=nodes[0],currentNode=nodes[1]; //extract nodes
+		T infoOfFoundNode=currentNode.GetInfo(); //get the info of the to be deleted node
+		this.UpdateMedianDelete(currentNode);//update the median value of the tree
+		this.DecrementSize();//decrease the size of the tree
+	
 		
-		
-		// Two Children
-		if (!ptr.GetIsLeftThread() && !ptr.GetIsRightThread())
-			this.Root= caseC(this.Root,par, ptr);
-	
-		// Only Left Child
-		else if (!ptr.GetIsLeftThread())
-			this.Root= caseB(this.Root,par,  ptr);
-	
-		// Only Right Child
-		else if (!ptr.GetIsRightThread())
-			this.Root = caseB(this.Root,par,  ptr);
-	
-		// No child
-		else
-			this.Root= caseA(this.Root,par, ptr);
-	
+		if (!currentNode.GetIsLeftThread() && !currentNode.GetIsRightThread()){ //check if has two real children
+			this.Root= applyHasTwoChildren(this.Root, currentNode);
+		}
+		else if ((!currentNode.GetIsLeftThread()) || //check if has left child or
+				 (!currentNode.GetIsRightThread())){  // check has a right child
+			this.Root= applyHasOneChild(this.Root,parent,  currentNode);
+		}
+		else { //finally has no children
+			this.Root= applyHasNoChild(this.Root,parent, currentNode);
+		}
 		return infoOfFoundNode;
 	}
 
-	// Here 'par' is pointer to parent Node and 'ptr' is
-	// pointer to current Node.
-	public BinaryNode<T> caseA(BinaryNode<T> root,BinaryNode<T> par,BinaryNode<T> ptr)
+	//Apply handling when the node to delete Has no child
+	//input: the root, the parent of node to delete and the node to delete
+	//output: the new root of the tree
+	public BinaryNode<T> applyHasNoChild(BinaryNode<T> root,BinaryNode<T> parent,BinaryNode<T> currentNode)
 	{
-		// If Node to be deleted is root
-		if (par==null)
+		if (parent==null) // check node to delete is root
 			root = null;
 	
-		// If Node to be deleted is left
-		// of its parent
-		else if (ptr==par.GetLeft())
+		else if (currentNode==parent.GetLeft()) //check if the node is a left child
 		{
-			par.SetIsLeftThread(true);
-			par.SetLeft(ptr.GetLeft());
+			parent.SetIsLeftThread(true);    //then the child is left thread
+			parent.SetLeft(currentNode.GetLeft()); //set the new child of parent to the nodes child
 		}
 		else
 		{
-			par.SetIsRightThread(true);
-			par.SetRight(ptr.GetRight());
+			parent.SetIsRightThread(true); //then the child is right thread
+			parent.SetRight(currentNode.GetRight());//set the new child of parent to the nodes child
 		}
 	
 		return root;
 	}
-
-	// Here 'par' is pointer to parent Node and 'ptr' is
-	// pointer to current Node.
-	public BinaryNode<T> caseB(BinaryNode<T> root,BinaryNode<T> par,BinaryNode<T> ptr)
-	{
-		BinaryNode<T> child;
+	//apply reassignments to the successor and predecessor of the node to delete
+	//input:  the node to delete
+	//output: none
+	public void ReassignSuccessorPredecessor(BinaryNode<T> currentNode){
+		BinaryNode<T> successor = currentNode.GetSuccessor(); // get successor and predecessor of the node to delete
+		BinaryNode<T> predecessor = currentNode.GetPredecessor();
 	
-		// Initialize child Node to be deleted has
-		// left child.
-		if (!ptr.GetIsLeftThread())
-			child = ptr.GetLeft();
-	
-		// Node to be deleted has right child.
+		
+		if (!currentNode.GetIsLeftThread()) // check if the left child is real and is subtree
+		{
+			predecessor.SetRight(successor); //connect  predecessor to successor with right thread
+		}
 		else
-			child = ptr.GetRight();
+		{
+			if (!currentNode.GetIsRightThread()){ // check if the left child is real and is subtree
+				successor.SetLeft(predecessor); //connect  successor to predecessor with left thread
+			}	
+		}
+		
+	}
+
+	//Apply handling when the node to delete Has one child
+	//input: the root, the parent of node to delete and the node to delete
+	//output: the new root of the tree
+	public BinaryNode<T> applyHasOneChild(BinaryNode<T> root,BinaryNode<T> parent,BinaryNode<T> currentNode)
+	{
+		BinaryNode<T> child; //hold a reference to the child
 	
-		// Node to be deleted is root Node.
-		if (par==null)
+	
+		if (!currentNode.GetIsLeftThread()){ //if the left child is not a thread then the child is the left
+			child = currentNode.GetLeft();
+		}
+		else{				//else go to right child
+			child = currentNode.GetRight();
+		}
+
+		if (parent==null){ // check node to delete is root
 			root = child;
-	
-		// Node is left child of its parent.
-		else if (ptr==par.GetLeft())
-			par.SetLeft(child);
-		else
-			par.SetRight(child);
-	
-		// Find successor and predecessor
-		BinaryNode<T> s = ptr.GetSuccessor();
-		BinaryNode<T> p = ptr.GetPredecessor();
-	
-		// If ptr has left subtree.
-		if (!ptr.GetIsLeftThread())
-		{
-			p.SetRight(s);
 		}
-		// If ptr has right subtree.
-		else
-		{
-			if (!ptr.GetIsRightThread())
-				s.SetLeft(p);
+		else if (currentNode==parent.GetLeft()){ // check if the node is a left or a right child
+			parent.SetLeft(child);
 		}
-		
+		else{
+			parent.SetRight(child);
+		}
+
+		ReassignSuccessorPredecessor(currentNode);
+
 		return root;
 	}
 
 
-
-	public BinaryNode<T> caseC(BinaryNode<T> root,BinaryNode<T> par,BinaryNode<T> ptr)
+	//Apply handling when the node to delete Has two children
+	//input: the root and the node to delete
+	//output: the new root of the tree
+	public BinaryNode<T> applyHasTwoChildren(BinaryNode<T> root,BinaryNode<T> currentNode)
 	{
-		// Find inorder successor and its parent.
-		BinaryNode<T> parsucc = ptr;
-		BinaryNode<T> succ = ptr.GetRight();
-	
-		// // Find leftmost child of successor
-		while (succ.IsParentOfLeft()) //TODO check
-		{
-			parsucc = succ;
-			succ = succ.GetLeft();
-		}
+		BinaryNode<T>[] successorAndParent=GetSuccessorAndParentOfRightSubtree(currentNode);
+		BinaryNode<T> parentOfTheSuccessor = successorAndParent[0];
+		BinaryNode<T> successor = successorAndParent[1];
 
-		ptr.SetInfo(succ.GetInfo());
-	
-		if (succ.GetIsLeftThread() && succ.GetIsRightThread())
-			root = caseA(root,parsucc, succ);
-		else
-			root = caseB(root,parsucc, succ);
-	
+		currentNode.SetInfo(successor.GetInfo()); //switch the info of node to delete 
+												//with the info of the minimum in the right subtree
+		//After switch, apply the correct deletion on the new tree 
+		if (successor.GetIsLeftThread() && successor.GetIsRightThread()) {
+			root = applyHasNoChild(root,parentOfTheSuccessor, successor); //to go has no children and update root
+		}
+		else{
+			root = applyHasOneChild(root,parentOfTheSuccessor, successor);//to go has one child and update root
+		}
 		return root;
 	}
 
-	public void UpdateMedianInsert(BinaryNode<T> node){
-		BinaryNode<T>[] nodes=this.Search(this.Median);
-		BinaryNode<T> medianNode=nodes[1];
-		if(this.Median==null || node==null){
-			return;
+	//Get the minimum value in right sutree and its parent
+	//input: the node to delete
+	//output: the minimum value in right sutree and its parent
+	public BinaryNode<T>[] GetSuccessorAndParentOfRightSubtree(BinaryNode<T> currentNode){
+		BinaryNode<T> parentOfTheSuccessor = currentNode; // hold reference to parent of the right node, 
+													    //which is the root of the right subtree
+		BinaryNode<T> successor = currentNode.GetRight(); //the root of the right subtree
+	
+		while (successor.IsParentOfLeft()) //get the minimum value in right sutree, while updating parent
+		{
+			parentOfTheSuccessor = successor;
+			successor = successor.GetLeft();
 		}
-		boolean isEven=this.Size %2 ==0;
-		boolean isSmaller = node.GetKey() < this.Median.GetKey();
+
+		BinaryNode<T>[] successorAndParent=(BinaryNode<T>[])new BinaryNode[2]; //return the pair
+		successorAndParent[0]=parentOfTheSuccessor;
+		successorAndParent[1]=successor;
+		return successorAndParent;
+	}
+
+	//Update the median with its correct predecessor or succsessor, if needed
+	//input: the node to be inserted
+	//output: none
+	public void UpdateMedianInsert(BinaryNode<T> node){
+		BinaryNode<T>[] medianAndParent=this.Search(this.Median); //find the medain and parent
+		BinaryNode<T> medianNode=medianAndParent[1]; //get the medain
 		
-		if(isEven && isSmaller){
+		boolean isEven=this.Size %2 ==0; //check if tree size is even
+		boolean isSmaller = node.GetKey() < this.Median.GetKey(); //check if the inserted is smaller than median 
+		
+		if(isEven && isSmaller){  // if tree size is even and the inserted value is smaller then the new median
+									//is the predecessor 
 			BinaryNode<T> predecessor=medianNode.GetPredecessor();
 			this.Median=predecessor==null? null: predecessor.GetInfo();
 		}
 		
-		if(!(isEven || isSmaller)){
+		if(!(isEven || isSmaller)){ // if tree size is odd and the median is smaller then the new median
+									//or equal then  the new median is the succsessor 
 			BinaryNode<T> succsessor=medianNode.GetSuccessor();
 			this.Median=succsessor ==null ? null: succsessor.GetInfo();
 		}
 	}
-	
+	//Update the median with its correct predecessor or succsessor, if needed
+	//input: the node to be deleted
+	//output: none
 	public void UpdateMedianDelete(BinaryNode<T> node){
-		if(this.Median==null || node==null){
+		if(this.Median==null || node==null){ //check if the median or the node is null
 			return;
 		}
-		BinaryNode<T>[] nodes=this.Search(this.Median);
-		BinaryNode<T> medianNode=nodes[1];
-		boolean isEven=this.Size %2 ==0;
+		BinaryNode<T>[] medianAndParent=this.Search(this.Median); //find the medain and parent
+		BinaryNode<T> medianNode=medianAndParent[1]; //get the median
+		boolean isEven=this.Size %2 ==0; //check if tree size is even
 		boolean isSmaller = node.GetKey() < this.Median.GetKey();
 		boolean isBigger = node.GetKey() > this.Median.GetKey();
 		boolean isSame = !isSmaller && !isBigger;
 		
 		if((!isEven && isSmaller)||(!isEven && isSame)){
+			// if tree size is odd and the inserted value is smaller or equal then the new median
+			//is the succsessor 
 			BinaryNode<T> succsessor=medianNode.GetSuccessor();
 			this.Median=succsessor ==null ? null: succsessor.GetInfo();
 		}
 		
 		if((isEven && isBigger)||(isEven && isSame)){
+			// if tree size is even and the inserted value is bigger or equal then the new median
+			//is the predecessor 
 			BinaryNode<T> predecessor=medianNode.GetPredecessor();
 			this.Median=predecessor==null? null: predecessor.GetInfo();
 		}
 	}
 	
+	//Get Minimum of tree
+	//input: none
+	//output: Minimum of tree
 	public BinaryNode<T> GetMinimum(){
 		return this.Root.GetMinium();
 	}
 	
+	//GetMaximum of tree
+	//input: none
+	//output: Maximum of tree
 	public BinaryNode<T> GetMaximum(){
 		return this.Root.GetMaximum();
 	}
 	
+	//GetPredecessor of node in the tree
+	//input: node in the tree
+	//output: Predecessor of node in the tree 
 	public  BinaryNode<T> GetPredecessor(BinaryNode<T> node){
 		return node.GetPredecessor();
 	}
 	
+	//GetSuccessor of node in the tree
+	//input: node in the tree
+	//output: Successor of node in the tree
 	public  BinaryNode<T> GetSuccessor(BinaryNode<T> node){
 		return node.GetSuccessor();
 	}
 	
+	
+	//Search for node in the tree and its parent
+	//input: info of the node
+	//output: node in the tree and its parent
 	public BinaryNode<T>[] Search(T info){
 		
-		BinaryNode<T> par=null;
-		BinaryNode<T> ptr=this.Root;
-				// Set true if key is found
-		boolean found = false;
+		BinaryNode<T> parent=null; //hold parent 
+		BinaryNode<T> currentNode=this.Root; //begin at root
+		boolean isFound = false; //
 
-		// Search key in BST : find Node and its
-		// parent.
-		while (ptr != null)
+		while (currentNode != null)
 		{
-			if (info.GetKey()==ptr.GetKey())
+			if (info.GetKey()==currentNode.GetKey()) //value was found, so search stops
 			{
-				found = true;
+				isFound = true;
 				break;
 			}
-			par = ptr;
-			if (info.GetKey() < ptr.GetKey())
+			parent = currentNode; //update parent 
+			if (info.GetKey() < currentNode.GetKey())  //check if needs to go to left or right subtree
 			{
-				if (!ptr.GetIsLeftThread())
-					ptr = ptr.GetLeft();
+				if (!currentNode.GetIsLeftThread()) //check if not a thread
+					currentNode = currentNode.GetLeft(); //goes to left subtree
 				else
-					break;
+					break; //thread reached with no value
 			}
 			else
 			{
-				if (!ptr.GetIsRightThread())
-					ptr = ptr.GetRight();
+				if (!currentNode.GetIsRightThread()) //check if not a thread
+					currentNode = currentNode.GetRight();  //goes to right subtree
 				else
-					break;
+					break;//thread reached with no value
 			}
 		}
 
-		if (found){
-			BinaryNode<T>[] arr=(BinaryNode<T>[])new BinaryNode[2];
-			arr[0]=par;
-			arr[1]=ptr;
-			return arr;
+		if (isFound){ //if found return the pair
+			BinaryNode<T>[] nodeAndParent=(BinaryNode<T>[])new BinaryNode[2];
+			nodeAndParent[0]=parent;
+			nodeAndParent[1]=currentNode;
+			return nodeAndParent;
 		}
-		return null;
+		return null; //wasnt found
 	}
 
+	//return the inorder of the nodes of the tree
+	//input: none
+	//output: inorder of the nodes of the tree
 	public String[] InorderStart(){
-		String[] keys=new String[this.Size];
-		int[] index={0};
-		Inorder(this.Root,keys,index);
+		String[] keys=new String[this.Size]; //create a array of the node values
+		int[] index={0}; //hold the index of next insertion
+		Inorder(this.Root,keys,index); 
 		return keys;
 	}
 
+	//Create the inorder of the nodes of the tree
+	//input: the node to check to insert to array, the array of values to return and the index for next insertion
+	//output: none
 	public void Inorder(BinaryNode<T> node,String[] keys,int[] index){
-		if(node.IsParentOfLeft()){
+		if(node.IsParentOfLeft()){ //check should go left subtree
 			Inorder(node.GetLeft(),keys,index);
 		}
-		keys[index[0]]=String.valueOf(node.GetKey());
+		keys[index[0]]=String.valueOf(node.GetKey()); //put the node value to array
 		index[0]++;
-		if(node.IsParentOfRight()){
+		if(node.IsParentOfRight()){//check should go right subtree
 			Inorder(node.GetRight(),keys,index);
 		}
 	}
 
-	
+	//return the Preorder of the nodes of the tree
+	//input: none
+	//output: Preorder of the nodes of the tree
 	public String[] PreorderStart(){
-		String[] keys=new String[this.Size];
-		int[] index={0};
+		String[] keys=new String[this.Size];//create a array of the node values
+		int[] index={0}; //hold the index of next insertion
 		Preorder(this.Root,keys,index);
 		return keys;
 	}
 
+	//Create the Preorder of the nodes of the tree
+	//input: the node to check to insert to array, the array of values to return and the index for next insertion
+	//output: none
 	public void Preorder(BinaryNode<T> node,String[] keys,int[] index){
-		keys[index[0]]=String.valueOf(node.GetKey());
+		keys[index[0]]=String.valueOf(node.GetKey()); //put the node value to array
 		index[0]++;
-		if(node.IsParentOfLeft()){
+		if(node.IsParentOfLeft()){ //check should go left subtree
 			Preorder(node.GetLeft(),keys,index);
 		}
-		if(node.IsParentOfRight()){
+		if(node.IsParentOfRight()){//check should go right subtree
 			Preorder(node.GetRight(),keys,index);
 		}
 	}
 
-	
+	//return the Postorder of the nodes of the tree
+	//input: none
+	//output: Postorder of the nodes of the tree
 	public String[] PostorderStart(){
-		String[] keys=new String[this.Size];
-		int[] index={0};
+		String[] keys=new String[this.Size];//create a array of the node values
+		int[] index={0};//hold the index of next insertion
 		Postorder(this.Root,keys,index);
 		return keys;
 	}	
 
+	//Create the Postorder of the nodes of the tree
+	//input: the node to check to insert to array, the array of values to return and the index for next insertion
+	//output: none
 	public void Postorder(BinaryNode<T> node,String[] keys,int[] index){
-		if(node.IsParentOfLeft()){
+		if(node.IsParentOfLeft()){//check should go left subtree
 			Postorder(node.GetLeft(),keys,index);
 		}
-		if(node.IsParentOfRight()){
+		if(node.IsParentOfRight()){//check should go right subtree
 			Postorder(node.GetRight(),keys,index);
 		}
-		keys[index[0]]=String.valueOf(node.GetKey());
+		keys[index[0]]=String.valueOf(node.GetKey());//put the node value to array
 		index[0]++;
 	}
 }
