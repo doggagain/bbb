@@ -1,3 +1,4 @@
+
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,23 @@ public class Program {
         PrintTree(tree.PreorderStart());
         PrintTree(tree.PostorderStart());
         
+    }
+
+    public void InputSycle(BinarySearchTree<Student> tree){
+        System.out.println("Choose option to do. Press 0 to exit.");
+        String input= new Scanner(System.in).nextLine();
+        while(input!="0"){
+            System.out.println("Press 1 to get minimum");
+            System.out.println("Press 2 to get maximum");
+            System.out.println("Press 3 to get median");
+            System.out.println("Press 4 to get size");
+            System.out.println("Press 5 to get inorder view");
+            System.out.println("Press 6 to get preorder view");
+            System.out.println("Press 7 to get postorder view");
+            System.out.println("Press 8 to insert node");
+            System.out.println("Press 9 to search node");
+            System.out.println("Press 10 to delete node");
+        }
     }
 
     public static void PrintTree(String[] keys){

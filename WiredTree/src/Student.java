@@ -1,7 +1,9 @@
 
 public class Student extends HaveKey {
-	private String Name;
-	private int Id;
+//	@JsonProperty("name")
+	public String Name;
+//	@JsonProperty("id")
+	public int Id;
 	
 	public Student(String name,int id){
 		this.Name=name;
@@ -32,5 +34,9 @@ public class Student extends HaveKey {
 
 	public int GetKey() {
 		return this.GetId();
+	}
+
+	public String toString(){
+		return "id: "+this.Id+", name: "+this.Name;
 	}
 }

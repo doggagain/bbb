@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 
@@ -19,6 +20,10 @@ public class BinaryParser {
         return CreateTree(students);
     } 
 
+    public BinarySearchTree<Student> GetTreeFromLine(String line){
+        return CreateTree(ParseLine(line));
+    }
+
     private Student[] ParseLine(String line){
         String[] parts=line.split(";");
         Student[] students=new Student[parts.length];
@@ -32,7 +37,7 @@ public class BinaryParser {
         BinarySearchTree<Student> tree=new BinarySearchTree<Student>();
 
         for(int i=0;i<students.length;i++){
-            tree.Insert(new BinaryNode<Student>(students[i]));
+            tree.Insert(students[i]);
         }
         return tree;
     }
