@@ -16,8 +16,7 @@ public class Program {
 
     public static void InputCycle(BinarySearchTree<Student> tree){
         String input= null;
-        do{
-        
+        while(input==null || input.compareTo("0")!=0){
             if(input!=null){
                 Command command=Program.ConsoleHandler.getCommand(input);
                 if(command==null){
@@ -40,8 +39,7 @@ public class Program {
             System.out.println("Press 10 to delete node");
             System.out.println("Press 11 to insert nodes from file.");
             input= new Scanner(System.in).nextLine();
-                
-        }while(input!="0");
+        }
         System.out.println("Thank you and Goodbye!");
     }
 
